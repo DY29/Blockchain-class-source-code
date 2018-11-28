@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+       <script src="./node_modules/web3/dist/web3.js"></script>
+       <script src="./node_modules/jquery/dist/jquery.js"></script>
+       <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+       <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+       <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+
+       <script>
+           let WEB3 = require("web3");
+           let web3 = new WEB3();
+           web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
+           var _greeting = "HelloWold" ;
+           var helloworldContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"say","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"setGreeting","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"greeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_greeting","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"greeting","type":"string"}],"name":"eventSetGreeting","type":"event"}]);
+           let hc =  helloworldContract.at("0xfaebe045d16adce632d7174704238b60c26dee2e");
+           $(function() {
+               //메시지 설정 버튼을 클릭한 경우
+                $('#btnSetGreeting').click(function(){
+                    let greeting = $('#greeting').val();
+                    hc.setGreeting(greeting, {from : web3.eth.accounts[0], gas : 1000000}, 
+                                                function(err, res){//res : tx
+                                                                    if (!err) {
+                                                                        console.log(`txid is ${res}`);
+                                                                        $('#divMsg').attr('class', 'alert alert-success')
+                                                                        $('#divMsg').text(`${res} 트랜잭션이 등록되었습니다`)
+                                                                    } else {
+                                                                        console.error(err);
+                                                                    }
+                                                                    });  
+                });
+                //메시지 확인 버튼을 클릭한 경우
+                $('#btnGetGreeting').click(function(){
+                    let msg =hc.say();
+                    $('#divMsg').text(msg);
+                // eventSetGreeting 발생을 감지
+                hc.eventSetGreeting().watch(function (err, res){
+                    if (!err){
+                        console.log(res);
+                        $('#divMsg').attr('class', 'alert alert-dark');
+                        $('#divMsg').text(res.args.greeting);
+                    }
+                });
+            });
+           });
+       </script>
+    </head>
+
+    <body>
+            <div class="container">
+            <div class="row">
+                <h1> Hello World </h1>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <label class="input-group-text" for="greeting">메세지</label>
+                    <input class="fom-control" type="text" id="greeting" />
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-primary" id="btnSetGreeting">메세지 설정</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-secondary" id="btnGetGreeting">메세지 확인</button>
+            </div>
+            <div class="row">
+                <div id="divMsg" class="alert alert-dark"></div>
+            </div>
+    </body>
+</html>
