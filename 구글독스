@@ -3,7 +3,7 @@
 블록체인 애플리케이션 개발자 양성과정
 
 오픈이지 박창렴 / naanjini@openeg.co.kr / 010-2982-7033
-https://docs.google.com/document/d/1Vo55RifCL0zs9hda-CX51L9W3h3p4stxwTYk6T554dU/edit#
+
 
 이전 데이터 삭제
 c:\Users\PC_USER_NAME\AppData\Ethash\  ⇐ 폴더 삭제
@@ -646,13 +646,172 @@ New File > wallet.html 파일 생성
    </body>
 </html>
 
-
-
-
-
-
-
-
 브라우저를 통해 확인
 http://localhost:8080/wallet.html
+
+
+
+HelloWorld 계약 연동
+HelloWorld.sol 계약을 리믹스 브라우저를 이용해서 배포
+pragma solidity >=0.4.25 <0.6.0;  
+
+// 계약 선언
+contract HelloWorld {
+    // 상태 변수 선언
+    string public greeting;
+
+    // 생성자
+    constructor(string memory _greeting) public {
+        greeting = _greeting;
+    }
+
+    // 함수 
+    function setGreeting(string memory _greeting) public {
+        greeting = _greeting;
+    }
+
+    function say() public view returns (string memory) {
+        return greeting;
+    }
+}
+
+Visual Studio > New File > HelloWorld.html 파일 생성
+
+<!doctype html>
+<html>
+   <head>
+       <meta charset="UTF-8">
+       <meta http-equiv="Cache-Control" content="no-cache">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+       <!--
+       <script src="./node_modules/web3/dist/web3.js"></script>
+       -->
+       <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+       <script src="./node_modules/jquery/dist/jquery.js"></script>
+       <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
+       <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+
+       <script>
+           let WEB3 = require("web3");
+           let web3 = new WEB3();
+           web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
+
+           let _greeting = "Hello World";
+           var helloworldContract = web3.eth.contract([{"constant":true,"inputs":[],"name":"say","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_greeting","type":"string"}],"name":"setGreeting","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"greeting","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_greeting","type":"string"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"greeting","type":"string"}],"name":"eventSetGreeting","type":"event"}]);
+
+           let hc = helloworldContract.at("0x7488c863ace370204a775e605d411fd3cac39dd3");
+          
+           $(function() {
+               // 메시지 설정 버튼을 클릭한 경우
+               $('#btnSetGreeting').click(function() {
+                   let greeting = $('#greeting').val();
+                   hc.setGreeting(
+                       greeting,
+                       {
+                           from: web3.eth.accounts[0], gas: 1000000
+                       },
+                       function(err, res) {
+                           if (!err) {
+                               console.log(`txid is ${res}`);
+                               $('#divMsg').attr('class', 'alert alert-success');
+                               $('#divMsg').text(`${res} 트랜잭션이 등록되었습니다.`);
+                           } else {
+                               console.error(err);
+                           }
+                       }   
+                   )   
+
+               });
+
+               // 메시지 확인 버튼을 클릭한 경우
+               $('#btnGetGreeting').click(function() {
+                   let msg = hc.say();
+                   $('#divMsg').text(msg);          
+               });
+
+               // eventSetGreeting 발생을 감시
+               hc.eventSetGreeting().watch(function (err, res) {
+                   if (!err) {
+                       console.log(res);
+                       $('#divMsg').attr('class', 'alert alert-dark');
+                       $('#divMsg').text(JSON.stringify(res)); // res.args.greeting);
+                   }
+               });
+           });
+       </script>
+   </head>
+   <body>
+       <div class="container">
+           <div class="row">
+               <h1>Hello World</h1>
+           </div>
+           <div class="row">
+               <div class="input-group">
+                   <label class="input-group-text" for="greeting">메시지</label>
+                   <input class="form-control" type="text" id="greeting" />
+                   <div class="input-group-append">
+                       <button type="button" class="btn btn-primary" id="btnSetGreeting">메시지 설정</button>
+                   </div>
+               </div>
+           </div>
+           <div class="row">
+               <button type="button" class="btn btn-secondary" id="btnGetGreeting">메시지 확인</button>
+           </div>
+           <div class="row">
+               <div id="divMsg" class="alert alert-dark"></div>
+           </div>
+       </div>
+   </body>
+</html>
+
+브라우저를 통해 확인
+http://localhost:8080/HelloWorld.html
+
+
+단일 머신(PC)에서 멀티 노드 실행
+각 노드의 데이터 디렉토리를 생성 
+c:\> mkdir c:\node1
+c:\> mkdir c:\node2
+c:\> mkdir c:\node3
+
+동일한 genesis.json 파일을 이용해서 geth 초기화
+c:\> geth --datadir c:\node1 init c:\testnet\genesis.json
+c:\> geth --datadir c:\node2 init c:\testnet\genesis.json
+c:\> geth --datadir c:\node3 init c:\testnet\genesis.json
+
+geth 초기화 결과를 확인
+c:\> tree c:\node1 /f /a
+c:\> tree c:\node2 /f /a
+c:\> tree c:\node3 /f /a
+
+첫번째 명령어 창에서 node1 기동 ⇒ 부트 노드로 활용
+c:\node1> geth --datadir c:\node1 --networkid 4649 console
+
+부트 노드의 enode 주소를 확인
+> admin.nodeInfo.enode
+"enode://c202275a0d7ee1d1bdf00df47b0e1ad4e64b5f71ea897ac9ad80df3a1c61a2e800c6ea04367479e8cd4c77fa467e8ada5694f0a550aab86aeb5d2923139d5fa5@[::]:30303"
+
+두번째 명령어 창에서 node2 기동 ⇒ 일반 노드로 활용
+c:\node2> geth --datadir c:\node2 --networkid 4649 console --port 30304 --ipcdisable
+
+부트 노드에 피어로 등록
+> admin.addPeer(boot_node's_enode_address)
+> admin.addPeer("enode://c202275a0d7ee1d1bdf00df47b0e1ad4e64b5f71ea897ac9ad80df3a1c61a2e800c6ea04367479e8cd4c77fa467e8ada5694f0a550aab86aeb5d2923139d5fa5@[::]:30303")
+
+세번째 명령어 창에서 node3 기동 ⇒ 마이너 노드로 활용
+c:\node3> geth --datadir c:\node3 --networkid 4649 console --port 30305 --ipcdisable
+
+부트 노드에 피어로 등록
+> admin.addPeer(boot_node's_enode_address)
+> admin.addPeer("enode://c202275a0d7ee1d1bdf00df47b0e1ad4e64b5f71ea897ac9ad80df3a1c61a2e800c6ea04367479e8cd4c77fa467e8ada5694f0a550aab86aeb5d2923139d5fa5@[::]:30303")
+
+node1에서 연결을 확인
+> net.peerCount
+
+> admin.peers
+
+> eth.coinbase
+"0xe5cd8129a1b2231f187fa2ee38f9b388255220ae"
 
