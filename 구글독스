@@ -1,0 +1,658 @@
+2018/11/07~2019/02/28 
+클라우드 기반 
+블록체인 애플리케이션 개발자 양성과정
+
+오픈이지 박창렴 / naanjini@openeg.co.kr / 010-2982-7033
+https://docs.google.com/document/d/1Vo55RifCL0zs9hda-CX51L9W3h3p4stxwTYk6T554dU/edit#
+
+이전 데이터 삭제
+c:\Users\PC_USER_NAME\AppData\Ethash\  ⇐ 폴더 삭제
+c:\Users\PC_USER_NAME\AppData\Roaming\Ethereum\ ⇐ 폴더 삭제
+* PC_USER_NAME ⇒ 명령어창(cmd.exe)을 실행했을 때 나오는 이름
+* 예) C:\Users\myanj>
+
+
+포트 충돌 오류 발생 시 프로세스 확인
+Fatal: Error starting protocol stack: listen tcp :30303: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+
+C:\> netstat -ano | findstr :30303
+  TCP    0.0.0.0:30303          0.0.0.0:0              LISTENING       457236
+  TCP    [::]:30303             [::]:0                 LISTENING       457236
+
+C:\> tasklist | findstr 457236
+geth.exe                    457236  Console                    4     32,808 K
+
+포트를 다르게 설정해서 geth를 실행
+> geth --datadir c:\testnet --networkid 4649 --nodiscover --maxpeers 0 console --port 다른포트번호
+
+
+실습 환경 구성
+NodeJS 다운로드 후 설치
+https://nodejs.org/dist/v8.11.4/node-v8.11.4-x64.msi
+
+Geth 다운로드 후 설치
+https://geth.ethereum.org/downloads/
+Geth 1.8.12 (64bit installer) 버전 다운로드 후 설치
+
+설치가 완료되면 명령어창을 통해 설치를 확인
+C:\> node --version
+v8.11.4
+
+C:\> npm --version
+5.6.0
+
+C:\> geth version
+Geth
+Version: 1.8.12-stable
+Git Commit: 37685930d953bcbe023f9bc65b135a8d8b8f1488
+Architecture: amd64
+Protocol Versions: [63 62]
+Network Id: 1
+Go Version: go1.10.3
+Operating System: windows
+GOPATH=
+GOROOT=C:\go
+
+데이터 디렉토리를 생성
+C:\>cd /
+
+C:\>mkdir testnet
+
+C:\>cd testnet
+
+C:\testnet>
+
+genesis 블록을 생성
+텍스트 편집기(메모장)을 열어서 c:\testnet\genesis.json 파일을 생성
+* 인코딩 타입을 ANIS로 설정
+* 확장자를 json으로 설정
+{
+    "config" : {
+        "chainId" : 15, 
+        "homesteadBlock" : 0, 
+        "eip155Block" : 0, 
+        "eip158Block" : 0
+    }, 
+    "nonce"      : "0x0000000000000042", 
+    "timestamp"  : "0x00", 
+    "parentHash" : "0x0000000000000000000000000000000000000000000000000000000000000000", 
+    "extraData"  : "0x00", 
+    "gasLimit"   : "0x80000000", 
+    "difficulty" : "0x4000", 
+    "mixHash"    : "0x0000000000000000000000000000000000000000000000000000000000000000", 
+    "coinbase"   : "0x0000000000000000000000000000000000000000", 
+    "alloc"      : {}
+}
+
+
+Geth 명령어 확인
+> geth --help
+
+Geth 초기화
+> geth --datadir c:\testnet init c:\testnet\genesis.json
+
+초기화 확인
+> tree c:\testnet /f /a
+폴더 PATH의 목록입니다.
+볼륨 일련 번호는 1827-51C6입니다.
+C:\TESTNET
+|   genesis.json
+|
++---geth
+|   +---chaindata
+|   |       000001.log
+|   |       CURRENT
+|   |       LOCK
+|   |       LOG
+|   |       MANIFEST-000000
+|   |
+|   \---lightchaindata
+|           000001.log
+|           CURRENT
+|           LOCK
+|           LOG
+|           MANIFEST-000000
+|
+\---keystore
+
+geth 실행
+> geth --datadir c:\testnet --networkid 4649 --nodiscover --maxpeers 0 console
+INFO [11-23|11:51:35.990] Maximum peer count                       ETH=0 LES=0 total=0
+INFO [11-23|11:51:36.186] Starting peer-to-peer node               instance=Geth/v1.8.12-stable-37685930/windows-amd64/go1.10.3
+INFO [11-23|11:51:36.197] Allocated cache and file handles         database=c:\\testnet\\geth\\chaindata cache=768 handles=1024
+INFO [11-23|11:51:36.269] Initialised chain configuration          config="{ChainID: 15 Homestead: 0 DAO: <nil> DAOSupport: false EIP1
+50: <nil> EIP155: 0 EIP158: 0 Byzantium: <nil> Constantinople: <nil> Engine: unknown}"
+INFO [11-23|11:51:36.285] Disk storage enabled for ethash caches   dir=c:\\testnet\\geth\\ethash count=3
+INFO [11-23|11:51:36.295] Disk storage enabled for ethash DAGs     dir=C:\\Users\\myanj\\AppData\\Ethash count=2
+INFO [11-23|11:51:36.306] Initialising Ethereum protocol           versions="[63 62]" network=4649
+INFO [11-23|11:51:36.317] Loaded most recent local header          number=0 hash=fe6fbd…9f1923 td=16384
+INFO [11-23|11:51:36.328] Loaded most recent local full block      number=0 hash=fe6fbd…9f1923 td=16384
+INFO [11-23|11:51:36.338] Loaded most recent local fast block      number=0 hash=fe6fbd…9f1923 td=16384
+INFO [11-23|11:51:36.349] Loaded local transaction journal         transactions=0 dropped=0
+INFO [11-23|11:51:36.360] Regenerated local transaction journal    transactions=0 accounts=0
+INFO [11-23|11:51:36.370] Starting P2P networking
+INFO [11-23|11:51:36.602] RLPx listener up                         self="enode://9afc48f7d0187f6fa16b8e3b1cb9967c61f0d28546b7f24028877
+651fa74e9d25a0561cc4360c519157597cbcbd9255f6c91190cad36967fd04dfb884766bb18@[::]:30303?discport=0"
+INFO [11-23|11:51:36.605] IPC endpoint opened                      url=\\\\.\\pipe\\geth.ipc
+Welcome to the Geth JavaScript console!
+
+instance: Geth/v1.8.12-stable-37685930/windows-amd64/go1.10.3
+ modules: admin:1.0 debug:1.0 eth:1.0 miner:1.0 net:1.0 personal:1.0 rpc:1.0 txpool:1.0 web3:1.0
+
+IPC 접속
+다른 명령어 창 실행 후 아래 명령어로 접속
+> geth attach ipc:\\.\pipe\geth.ipc
+
+RPC 활성화
+> geth --datadir c:\testnet console --networkid 4649 --nodiscover --maxpeers 0 --rpc --rpcaddr "0.0.0.0" --rpcport 8545 --rpccorsdomain "*" --rpcapi "db,eth,net,web3,admin,debug,miner,shh,txpool,personal"
+
+RPC 접속
+> geth attach rpc:http://localhost:8545
+
+
+전자서명 과정
+전자서명: 송신자의 개인키로 암호화
+서명검증: 송신자의 공개키로 복호화
+
+
+
+
+콘솔에서 계약 작성 및 실행
+windows build tools 설치 (관리자 권한으로 실행)
+시작 메뉴 > 명령 프롬프트 > 오른쪽 클릭 > 자세히 > 관리자 권한으로 실행
+
+멈춤 현상이 있는 경우 → Ctrl+C (작업종료) → 탐색기에서 아래 파일을 실행
+C:\users\pc_user_name\.windows-build-tools\vs_BuildTools.exe
+
+아래부터는 관리자 권한이 아니어도 관계 없음
+npm init (아래 명령 입력 후 계속 엔터)
+c:\testnet> npm init
+
+solc-js 설치
+c:\testnet> npm install solc@0.4.25
+
+web3 설치
+c:\testnet> npm install web3@0.20.7
+
+설치 확인
+c:\testnet> node
+> require("web3")
+{ [Function: Web3]
+  providers:
+   { HttpProvider: [Function: HttpProvider],
+     IpcProvider: [Function: IpcProvider] } }
+
+> require("solc")
+{ version: [Function],
+  semver: [Function: versionToSemver],
+  license: [Function],
+  compile: [Function: compile],
+  compileStandard: [Function: compileStandard],
+  compileStandardWrapper: [Function: compileStandardWrapper],
+  linkBytecode: [Function: linkBytecode],
+  supportsMulti: true,
+  supportsImportCallback: true,
+  supportsStandard: true,
+  loadRemoteVersion: [Function: loadRemoteVersion],
+  setupMethods: [Function: setupMethods] }
+
+c:\testnet\HelloWorld.sol 파일을 생성
+
+node.js 실행
+c:\testnet> node
+
+solc 모듈 임포트
+> solc = require('solc');
+{ version: [Function],
+  semver: [Function: versionToSemver],
+  license: [Function],
+  compile: [Function: compile],
+  compileStandard: [Function: compileStandard],
+  compileStandardWrapper: [Function: compileStandardWrapper],
+  linkBytecode: [Function: linkBytecode],
+  supportsMulti: true,
+  supportsImportCallback: true,
+  supportsStandard: true,
+  loadRemoteVersion: [Function: loadRemoteVersion],
+  setupMethods: [Function: setupMethods] }
+
+소스 코드를 읽어서 문자열로 변환
+> sourceCode = fs.readFileSync('HelloWorld.sol').toString();
+'/* C:\\testnet\\HelloWorld.sol */\r\n\r\n// 버전 프라그마\r\npragma solidity ^0.4.25; // 0.4.25 <= vers
+ion < 0.5.0 \r\n\r\n// 계약 선언\r\ncontract HelloWorld {\r\n    // 상태 변수 선언\r\n    string public
+greeting;\r\n\r\n    // 생성자\r\n    function HelloWorld(string _greeting) {\r\n    // constructor (str
+ing _greeting) public {\r\n        greeting = _greeting;\r\n    }\r\n\r\n    // 함수 \r\n    function se
+tGreeting(string _greeting) {\r\n        greeting = _greeting;\r\n    }\r\n\r\n    function say() consta
+nt returns (string) {\r\n        return greeting;\r\n    }\r\n}'
+
+소스 코드 컴파일
+> compiledCode = solc.compile(sourceCode);
+			:
+  errors:
+   [ ':12:5: Warning: Defining constructors as functions with the same name as the contract is deprecated
+. Use "constructor(...) { ... }" instead.\n    function HelloWorld(string _greeting) {\r\n    ^ (Relevant
+ source part starts here and spans across multiple lines).\n',
+     ':12:5: Warning: No visibility specified. Defaulting to "public". \n    function HelloWorld(string _
+greeting) {\r\n    ^ (Relevant source part starts here and spans across multiple lines).\n',
+     ':18:5: Warning: No visibility specified. Defaulting to "public". \n    function setGreeting(string
+_greeting) {\r\n    ^ (Relevant source part starts here and spans across multiple lines).\n',
+     ':22:5: Warning: No visibility specified. Defaulting to "public". \n    function say() constant retu
+rns (string) {\r\n    ^ (Relevant source part starts here and spans across multiple lines).\n' ],
+  sourceList: [ '' ],
+  sources: { '': { AST: [Object] } } }
+⇒ Error가 포함되어 있는 경우, … 수정 후 다시 컴파일
+
+컴파일 결과에서 ABI, ByteCode를 추출
+> abiDefinition = JSON.parse(compiledCode.contracts[':HelloWorld'].interface);
+[ { constant: true,
+    inputs: [],
+    name: 'say',
+    outputs: [ [Object] ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function' },
+  { constant: false,
+    inputs: [ [Object] ],
+    name: 'setGreeting',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function' },
+  { constant: true,
+    inputs: [],
+    name: 'greeting',
+    outputs: [ [Object] ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function' },
+  { inputs: [ [Object] ],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'constructor' } ]
+
+> byteCode = '0x'+compiledCode.contracts[':HelloWorld'].bytecode;
+'0x608060405234801561001057600080fd5b50604051610514380380610514833981018060405281019080805182019291905050508060009080519060200190610049929190610050565b50506100f5565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061009157805160ff19168380011785556100bf565b828001600101855582156100bf579182015b828111156100be5782518255916020019190600101906100a3565b5b5090506100cc91906100d0565b5090565b6100f291905b808211156100ee5760008160009055506001016100d6565b5090565b90565b610410806101046000396000f300608060405260043610610057576000357c0100000000000… 5627a7a7230582078fd18bbb42b2710623fe56ce979342c9d33cbf880dc84dd6e5898a15521b6810029'
+
+계약 객체 생성
+> Web3 = require('web3');
+> web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+> HelloWorldContract = web3.eth.contract(abiDefinition);
+
+계약 배포
+> _greeting = "Hello, World";
+> deployedContract = HelloWorldContract.new(_greeting, { data: byteCode, from: web3.eth.accounts[0], gas: 4700000 });
+ Error: authentication needed: password or unlock
+    at Object.InvalidResponse (c:\testnet\node_modules\web3\lib\web3\errors.js:38:16)
+    at RequestManager.send (c:\testnet\node_modules\web3\lib\web3\requestmanager.js:61:22)
+    at Eth.send [as sendTransaction] (c:\testnet\node_modules\web3\lib\web3\method.js:145:58)
+    at ContractFactory.new (c:\testnet\node_modules\web3\lib\web3\contract.js:228:33)
+
+accounts[0] 계정 잠금을 해제 (GETH 터미널에서)
+> personal.unlockAccount(eth.accounts[0], "pass0", 0)
+
+마이닝을 통해 계약 배포 (GETH 터미널에서)
+> miner.start(1)
+
+생성(배포)된 계약을 참조(사용)
+> deployedContract
+> deployedContract.address
+> deployedContract.greeting.call()
+'Hello, World'
+> deployedContract.say()
+'Hello, World'
+> deployedContract.say.call()
+'Hello, World'
+> deployedContract.setGreeting.sendTransaction("Hello Ethereum!!!", { from: web3.eth.accounts[0], gas: 1
+000000 })
+'0x72c72fc7860d70471a9bea9c7da4c3a5903909c9e00195c4e2fccfc599cbed16' ⇐ 트랜잭션 ID
+> deployedContract.say.call()
+'Hello Ethereum!!!' ⇐ 상태변수의 값이 변경된 것을 확인
+
+
+
+리믹스 환경에서 계약 생성 및 배포
+https://remix.ethereum.org
+
+HelloWorld.sol
+// 버전 프라그마
+pragma solidity ^0.4.25; // 0.4.25 <= version < 0.5.0 
+
+// 계약 선언
+contract HelloWorld {
+    // 상태 변수 선언
+    string public greeting;
+
+    // 생성자
+    function HelloWorld(string _greeting) {
+        greeting = _greeting;
+    }
+
+    // 함수 
+    function setGreeting(string _greeting) {
+        greeting = _greeting;
+    }
+
+    function say() constant returns (string) {
+        return greeting;
+    }
+}
+
+Solidity 0.5.x 호환
+// 버전 프라그마
+pragma solidity >=0.4.25 <0.6.0;  
+
+// 계약 선언
+contract HelloWorld {
+    // 상태 변수 선언
+    string public greeting;
+
+    // 생성자
+    constructor(string memory _greeting) public {
+        greeting = _greeting;
+    }
+
+    // 함수 
+    function setGreeting(string memory _greeting) public {
+        greeting = _greeting;
+    }
+
+    function say() public view returns (string memory) {
+        return greeting;
+    }
+}
+
+
+
+
+
+web3를 이용한 웹 페이지, Geth 연동
+c:\testnet\web3test 폴더 생성
+c:\testnet> mkdir web3test
+c:\testnet> cd web3test
+
+web3 설치
+c:\testnet\web3test> npm init
+c:\testnet\web3test> npm install web3@0.20.7
+
+Http-Server 설치 및 실행
+c:\testnet\web3test> npm install -g http-server
+c:\testnet\web3test> http-server
+
+Visual Studio Code 실행
+File > Open Folder > c:\testnet\web3test 선택 후 "폴더 선택" 버튼 클릭
+
+New File > web3test.html 파일 생성
+<script src="./node_modules/web3/dist/web3.js"></script>
+<script>
+   var Web3 = require('web3');
+   web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+
+   console.log(web3.isConnected());
+  
+   // 동기 방식으로 10번째 블록 정보 조회
+   console.log("#1");
+   console.log(web3.eth.getBlock(10));
+   console.log("#2");
+
+   // 비동기 방식으로 10번째 블록 정보 조회
+   web3.eth.getBlock(10, function(err, res) {
+       console.log("#3");
+       if (!err) console.log(res);
+       else console.error(err);
+       console.log("#4");
+   });
+   console.log("#5");
+
+   // 콘솔 로그가 #1 -> #2 -> #5 -> #3 -> #4 순으로 출력되는 것을 확인
+ 
+
+   // 화폐 단위 변경
+   var eth = web3.fromWei(10000000000, 'ether');
+   console.log(eth);
+
+   // 동기 방식으로 가스 가격 조회
+    var gasPrice = web3.eth.gasPrice;
+   console.log(`동기 gasPrice = ${gasPrice}`);
+
+   // 비동기 방식으로 가스 가격 조회
+   web3.eth.getGasPrice(function(err, res) {
+       if (!err) console.log(`비동기 gasPrice = ${res}`);
+       else console.error(err);
+   });
+  
+   // 계정 잔액 조회
+   var account = "0xe550a165422da229d4a14c1d8ef759a1427999da";
+   var balance = web3.eth.getBalance(account);
+   console.log(`${account}'s balance is ${balance}`);
+
+   // 계정 목록 조회
+   console.log(web3.eth.accounts);
+
+   // 모든 계정의 잔액 조회
+   let accounts = web3.eth.accounts;
+   console.log("STYLE 1 ---------------");
+   for (i = 0; i < accounts.length; i ++) {
+       let balance = web3.eth.getBalance(accounts[i]);
+       console.log(`${accounts[i]}'s balance is ${balance}`);
+   }
+
+   console.log("STYLE 2 ---------------");
+   accounts.forEach(function(account) {
+       let balance = web3.eth.getBalance(account);
+       console.log(`${account}'s balance is ${balance}`);
+   });
+
+   console.log("STYLE 3 ---------------");
+   accounts.forEach(account => {
+       let balance = web3.eth.getBalance(account);
+       console.log(`${account}'s balance is ${balance}`);
+   });
+
+
+   // accounts[0]에서 accounts[1]에게 10 이더를 송금
+   let balance0 = web3.eth.getBalance(web3.eth.accounts[0]);
+   let balance1 = web3.eth.getBalance(web3.eth.accounts[1]);
+   console.log(`accounts[0] = ${web3.fromWei(balance0, "ether")}`);
+   console.log(`accounts[1] = ${web3.fromWei(balance1, "ether")}`);
+
+   // 보내는 사람의 계정을 unlock 처리
+   if (web3.personal.unlockAccount(web3.eth.accounts[0], "pass0")) {
+       // 송금 처리
+       web3.eth.sendTransaction({
+           from  : web3.eth.accounts[0],
+           to    : web3.eth.accounts[1],
+           value : web3.toWei(10, "ether")
+       }, function(err, res) {
+           if (!err) {
+               console.log(`txid = ${res}`);
+           } else {
+               console.error(err);
+           }
+       });
+   }
+
+   // 블록에 변화를 감지해서 잔액을 조회
+   web3.eth.filter('latest').watch(function() {
+       balance0 = web3.eth.getBalance(web3.eth.accounts[0]);
+       balance1 = web3.eth.getBalance(web3.eth.accounts[1]);
+       console.log(`accounts[0] = ${web3.fromWei(balance0, "ether")}`);
+       console.log(`accounts[1] = ${web3.fromWei(balance1, "ether")}`);
+   }); 
+</script>
+
+브라우저를 통해 확인
+http://localhost:8080/web3test.html
+
+
+
+Ether wallet 구현
+작업 디렉토리 생성 및 필요한 모듈 설치
+c:\testnet> mkdir wallet
+c:\testnet> cd wallet
+c:\testnet\wallet> npm init
+c:\testnet\wallet> npm install web3@0.20.7
+c:\testnet\wallet> npm install jquery  
+c:\testnet\wallet> npm install bootstrap  
+
+Visual Studio Code 실행
+File > Open Folder > c:\testnet\wallet 선택 후 "폴더 선택" 버튼 클릭
+
+New File > wallet.html 파일 생성
+<!doctype html>
+<html>
+   <head>
+       <meta charset="UTF-8">
+       <meta http-equiv="Cache-Control" content="no-cache">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      
+       <script src="./node_modules/web3/dist/web3.js"></script>
+       <script src="./node_modules/jquery/dist/jquery.js"></script>
+       <script src="./node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
+       <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.css">
+       <style>
+           label {
+               min-width: 200px !important;
+               display: inline-block !important;
+           }
+       </style>
+   </head>
+   <body>
+       <div class="container">
+           <!-- 제목 -->
+           <div class="row">
+               <h1>ETHER Wallet</h1>
+           </div>
+           <!-- 계좌 잔고 출력 -->
+           <div class="row">
+               <div id="divStatus">
+                                   
+               </div>       
+           </div>
+           <!-- 송금 입력 창 -->
+           <div class="row">
+               <div class="input-group">
+                   <label class="input-group-text" for="fromAccounts">보내는 사람</label>                   
+                   <select class="form-control accountsList" id="fromAccounts">
+                       <option selected>선택하세요.</option>
+                   </select>
+               </div>
+               <div class="input-group">
+                   <label class="input-group-text" for="fromPassword">패스워드</label> 
+                   <input class="form-control" id="fromPassword" type="password" />
+               </div>
+               <div class="input-group">
+                   <label class="input-group-text" for="toAccounts">받는 사람</label>
+                   <select class="form-control accountsList" id="toAccounts">
+                       <option selected>선택하세요.</option>
+                   </select>
+               </div>
+               <div class="input-group">
+                   <label class="input-group-text" for="amount">송금액</label>
+                   <input class="form-control" id="amount" type="number" />
+                   <div class="input-group-append">
+                       <span class="input-group-text">ETHER</span>
+                       <button type="button" class="btn btn-primary" id="btnSend">송금</button>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+       <script>
+           var WEB3 = require('web3');
+           var web3 = new WEB3();
+           web3.setProvider(new web3.providers.HttpProvider("http://localhost:8545"));
+
+           // 계정 정보를 조회해서 보내는 사람과 받는 사람 선택창에 설정
+           function setAccountsList() {
+               let accounts = web3.eth.accounts;
+               accounts.forEach(account => {
+                   $('.accountsList').append(`
+                       <option value="${account}">
+                           ${account.substr(0,6)}...${account.substr(-4)}
+                       </option>
+                   `);       
+               });
+           }
+
+           // 계정별 잔액을 출력
+           function showStatus() {
+               let table = `
+                   <table class="table table-striped">
+                   <thead class="thead-dark">
+                       <tr>
+                           <th scope="col">계정</th>
+                           <th scope="col">잔액</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                   </tbody>
+                   </table>
+               `;
+               $('#divStatus').empty();
+               $('#divStatus').append(table);
+
+               let totalAmount = 0;
+               let accounts = web3.eth.accounts;
+               accounts.forEach(account => {
+                   let balance = parseFloat(web3.fromWei(web3.eth.getBalance(account), "ether"));
+                   totalAmount += balance;
+                   $('tbody').append(`<tr><td>${account}</td><td>${balance}</td></tr>`);
+               });
+               $('tbody').append(`<tr><td>총액</td><td>${totalAmount}</td></tr>`)
+           }
+
+           $(function() {
+               setAccountsList();
+               showStatus();
+              
+               // 블록에 변화가 생겼을 때 계정별 잔액 정보를 갱신
+               web3.eth.filter('latest').watch(function() {
+                   showStatus();
+               });
+
+               // 송금 버튼을 클릭했을 때, 송금을 요청
+               $('#btnSend').click(function() {
+                   let fromAccount  = $('#fromAccounts').val();
+                   let toAccount    = $('#toAccounts').val();
+                   let fromPassword = $('#fromPassword').val();
+                   let amount       = $('#amount').val();
+                  
+                   // 보내는 사람의 계정을 언락
+                   let isUnlock = web3.personal.unlockAccount(fromAccount, fromPassword);
+                   if (isUnlock) {
+                       web3.eth.sendTransaction({
+                           from : fromAccount,
+                           to   : toAccount,
+                           value: web3.toWei(amount, "ether")
+                       }, function(err, res) {
+                           if (!err) {
+                               console.log(`txid is ${res}.`);
+                           } else {
+                               console.error(err);
+                           }
+                       });
+                   }
+
+                   // sendTransaction()
+
+
+
+               });
+           });
+          
+       </script>
+   </body>
+</html>
+
+
+
+
+
+
+
+
+브라우저를 통해 확인
+http://localhost:8080/wallet.html
+
