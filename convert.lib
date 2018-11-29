@@ -1,0 +1,8 @@
+pragma solidity ^0.4.4;
+//library 함수는 다른계약에서 상태 변수 참조나 함수 호출 (실행 )이 가능
+library ConvertLib{
+	function convert(uint amount,uint conversionRate) public pure returns (uint convertedAmount)
+	{
+		return amount * conversionRate;
+	}
+}
