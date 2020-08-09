@@ -1,0 +1,37 @@
+<script src="./node_modules/web3/dist/web3.js"></script>
+<script>
+    var Web3 = require('web3');
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    console.log(web3.isConnected());
+    // 10번째 블록 정보 조회
+    console.log(web3.eth.getBlock(10))
+
+    console.log("#1");
+    console.log("#2");
+    console.log("#3");
+
+    web3.eth.getBlock(10, function(err,res) {
+        console.log("#3");
+        if (!err) console.log(res);
+        else console.error(err);
+        console.log("#4");
+
+    });
+    console.log("#5");
+
+    var v =  web3.fromWei(10000000000, 'ether');
+    console.log(v);
+
+    var gasPrice = web3.eth.gasPrice;
+    console.log(`동기 gasPrice= ${gasPrice}`)
+
+    web3.eth.getGasPrice(function(err, res){
+        if (!err) console.log(`비동기 gasPrice = ${res}`);
+        else console.error(err);
+    });
+    var account = "0xfeba91ea7f9356b444780e3f65d6c8050701ae02";
+    var balance = web3.eth.getBalance(account);
+ //계좌 목록에서 가져와서 n번째 계좌 잔액 n이더 있다 표현해라
+    var accounts = web3.eth.accounts;
+
+</script>
